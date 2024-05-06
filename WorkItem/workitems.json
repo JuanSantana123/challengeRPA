@@ -1,0 +1,13 @@
+[
+    {
+        "payload": {
+            "search_phrase":"Brazil",
+            "news_category":"oldest",
+            "months": 0
+            
+        },
+        "files": {
+            "file1": "path/to/file.ext"
+        }
+    }
+]
