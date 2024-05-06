@@ -55,7 +55,6 @@ def get_first_day_previous_months(num_months):
         previous_month += 12  # Ajusta para o último mês do ano anterior
 
     first_day_previous_month = current_date_time.replace(year=current_date_time.year - year_diff, month=previous_month, day=1)
-    print(first_day_previous_month.strftime("%m/%d/%Y"))
     return first_day_previous_month.strftime("%m/%d/%Y")
     
 def catch_informations(search_phrase,news_category, current_date_formatted, first_day_previous_months):
@@ -80,14 +79,14 @@ def catch_informations(search_phrase,news_category, current_date_formatted, firs
     # Search the phrase in the  result field
     search_element = WebDriverWait(driver, 30).until(
         EC.element_to_be_clickable((By.XPATH,"//*[@id='search-input']/form/div/input"))
-    )
+        )
 
     search_element.send_keys(search_phrase)
     logging.info("Searching the phrase:",{search_element})
     # click in the go button
     element_go = WebDriverWait(driver, 30).until(
         EC.element_to_be_clickable((By.CSS_SELECTOR,"[data-testid='search-submit']"))
-    )
+        )
     element_go.click()
 
     #Sort by 
@@ -95,37 +94,37 @@ def catch_informations(search_phrase,news_category, current_date_formatted, firs
 
     element_sort_by = WebDriverWait(driver, 30).until(
         EC.element_to_be_clickable((By.CSS_SELECTOR,".css-v7it2b"))
-    )
+        )
     select = Select(element_sort_by)
     select.select_by_value(news_category)
 
     #Click on Data Range Button
     data_range = WebDriverWait(driver, 30).until(
         EC.element_to_be_clickable((By.CSS_SELECTOR,".css-trpop8"))
-    )
+        )
     logging.info("Clicking on Data Range button")
     data_range.click()
 
     #Click on Specific Dates
     specific_date = WebDriverWait(driver, 30).until(
-    EC.element_to_be_clickable((By.XPATH,"//*[@id='site-content']/div/div[1]/div[2]/div/div/div[1]/div/div/div/ul/li[6]/button"))
-    )
+        EC.element_to_be_clickable((By.XPATH,"//*[@id='site-content']/div/div[1]/div[2]/div/div/div[1]/div/div/div/ul/li[6]/button"))
+        )
     logging.info("Clicking on Specific Dates button")
     specific_date.click()
         
         
     #Start Date
     start_date_field = WebDriverWait(driver, 30).until(
-    EC.element_to_be_clickable((By.XPATH,"//*[@id='startDate']"))
-    )
-    logging.info("Start Date:", {start_date_field})
+        EC.element_to_be_clickable((By.XPATH,"//*[@id='startDate']"))
+        )
     start_date_field.send_keys(first_day_previous_months)
+    logging.info("Start Date:", first_day_previous_months)
     #End Date
     end_date_field = WebDriverWait(driver, 30).until(
-    EC.element_to_be_clickable((By.XPATH,"//*[@id='endDate']"))
-    )
-    logging.info("End Date:",{current_date_formatted})
+        EC.element_to_be_clickable((By.XPATH,"//*[@id='endDate']"))
+        )
     end_date_field.send_keys(current_date_formatted)
+    logging.info("End Date:", current_date_formatted)
 
     #click in the enter button
     logging.info("Click [ENTER]")
@@ -157,17 +156,15 @@ def catch_informations(search_phrase,news_category, current_date_formatted, firs
 
         if get_line:
             if re.search(find_advertisement,get_line):
-                 print(get_line)
-                 print("__________________________________________________")
                  continue              
-        
+            
         catch_line = driver.find_elements(By.XPATH,selector_title.format(counter_lines))
         if catch_line:
             get_line = catch_line[0]
             title = get_line.text
             logging.info("Title of the news:", {title})
         else:
-            print("O elemento NÃO foi encontrado.")
+            logging.info("Click [ENTER]")
         
         catch_line = driver.find_elements(By.XPATH,selector_description.format(counter_lines))
         if catch_line:
@@ -176,16 +173,16 @@ def catch_informations(search_phrase,news_category, current_date_formatted, firs
             
             logging.info("Description of the news:", {description})
         else:
-            print("O elemento NÃO foi encontrado.")
+            
+            logging.info("The description element was not found.")
         
         catch_line = driver.find_elements(By.XPATH,selector_date.format(counter_lines))
         if catch_line:
             get_line = catch_line[0]
             date_field = get_line.text
-            
             logging.info("Date of the news:", {date_field})
         else:
-            print("O elemento NÃO foi encontrado.")
+            logging.info("The date element was not found.")
 
 
 
@@ -193,7 +190,7 @@ def catch_informations(search_phrase,news_category, current_date_formatted, firs
        
         if catch_line:
                 img_url = catch_line[0].get_attribute("src")
-                print("Image URL:", img_url)
+                logging.info("Image URL:", img_url)
                 response = requests.get(img_url)
                 picture_filename = os.path.basename(img_url.split('?')[0])
                 if response.status_code == 200:
@@ -204,27 +201,28 @@ def catch_informations(search_phrase,news_category, current_date_formatted, firs
                     with open(caminho_completo, 'wb') as f:
                         f.write(response.content)
                 else:
-                    print("Error to download the image")
+                    logging.info("Error to download the image")
         else:
                 
                 logging.info("The picture didnt find")
                 
 
         def count_occurrences(search_phrase, title, description):
-        # Compila o padrão regex para a palavra desejada, ignorando maiúsculas/minúsculas
+        #Compile the regex pattern for the desired word, ignoring case
             pattern = re.compile(re.escape(search_phrase), re.IGNORECASE)
 
-        # Encontra todas as correspondências no título e descrição usando o padrão regex
+        # Find all matches in the title and description using the regex pattern
             title_matches = pattern.findall(title.lower())
             description_matches = pattern.findall(description.lower())
 
-        # Retorna o número total de ocorrências encontradas
+        # Return the total number of occurrences found
+
             total_matches = len(title_matches) + len(description_matches)
             return total_matches
         
         total_matches = count_occurrences(search_phrase, title, description)
         def contains_money_in_title_or_description(title, description):
-    # Padrão regex para valores monetários (exemplo: $10,00 ou R$ 500.50)
+    # regex pattern to find values
             money_pattern = r'\$(\d){0,}(.|,)\d{0,}(.|,)\d{0,}|(\d){0,}(.|,)\d{0,}(.|,)\d{0,}\s*dollars|(\d){0,}(.|,)\d{0,}(.|,)\d{0,}\s*USD'
 
    
@@ -234,17 +232,15 @@ def catch_informations(search_phrase,news_category, current_date_formatted, firs
             return title_has_money or description_has_money
         
         has_money = contains_money_in_title_or_description(title, description)
-        print(f"O título ou descrição contêm dinheiro: {has_money}")
+        logging.info("The title or description contains money:", has_money)
 
 
         # Save informations in excel
         nome_arquivo_existente = r"C:\Users\Juan\Desktop\Projetos\RPA Challenge\Arquivos\Challenge.xlsx"
         wb = load_workbook(filename=nome_arquivo_existente)
 
-        # Acessa a planilha desejada
+        # Access the desired spreadsheet.
         planilha = wb["Dados"]
-
-        # Adiciona novos dados à planilha
         novos_dados = [
             [title,date_field, description, picture_filename,total_matches,has_money]
         ]
@@ -256,10 +252,9 @@ def catch_informations(search_phrase,news_category, current_date_formatted, firs
         elements_show_more = driver.find_elements(By.CSS_SELECTOR, "[data-testid='search-show-more-button']")
         if elements_show_more:
             element_show_more = elements_show_more[0]
-            print("O elemento foi encontrado.")
             element_show_more.click()
         else:
-            print("O elemento NÃO foi encontrado.")
+            logging.info("The element show more was not found.")
 
         print('-------------------------------------------------------------------------------------------------------------')
 
